@@ -91,4 +91,10 @@ public class Unit : MonoBehaviour {
 		// Reset our available movement points.
 		remainingMovement = moveAmount;
 	}
+
+    private void OnTriggerEnter(Collider collision)
+    {
+        Debug.Log("Dead");
+    }
+
 }
