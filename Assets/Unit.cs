@@ -22,6 +22,11 @@ public class Unit : MonoBehaviour {
 
     float moveSpeed = 4.0f; //How fast player moves, Increase to increase speed.
 
+    private void Start()
+    {
+        map = FindObjectOfType<TileMap>();
+    }
+
 
     void Update() {
 		// Draw our debug line showing the pathfinding!
@@ -91,10 +96,5 @@ public class Unit : MonoBehaviour {
 		// Reset our available movement points.
 		remainingMovement = moveAmount;
 	}
-
-    private void OnTriggerEnter(Collider collision)
-    {
-        Debug.Log("Dead");
-    }
 
 }

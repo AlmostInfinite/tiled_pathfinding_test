@@ -6,6 +6,7 @@ public class TileMap : MonoBehaviour
 {
 
     public GameObject selectedUnit;
+    public GameObject spawnUnit;
 
     public TileType[] tileTypes;
 
@@ -32,6 +33,7 @@ public class TileMap : MonoBehaviour
 
     void Start()
     {
+
         // Setup the selectedUnit's variable
         selectedUnit.GetComponent<Unit>().tileX = (int)selectedUnit.transform.position.x;
         selectedUnit.GetComponent<Unit>().tileY = (int)selectedUnit.transform.position.y;
@@ -48,6 +50,11 @@ public class TileMap : MonoBehaviour
 
     public void SpawnWave()
     {
+
+        //TODO FIX Instantiate
+         Instantiate(spawnUnit, new Vector3(20, 8, 0), spawnUnit.transform.rotation);
+
+
         // Taken from clickable tile, calls the move pawn function
         GeneratePathTo(tileFinishX, tileFinishY);
     }
