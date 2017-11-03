@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class TileMap : MonoBehaviour
+public class TileMap2 : MonoBehaviour
 {
 
     public GameObject selectedUnit;
@@ -13,7 +13,7 @@ public class TileMap : MonoBehaviour
     int[,] tiles;
     Node[,] graph;
 
-    //use to move rows up(x) or right(y).
+    //use to move rows up(x) or right(z).
     int leftBorder = 5;
     int rightBorder = 1;
     
@@ -25,7 +25,7 @@ public class TileMap : MonoBehaviour
     public int mapSizeY = 11;
 
     protected int totalMapSizeX;
-    protected int totalMapSizeY;
+    protected int totalMapSizeZ;
 
     //position to travel to
     public int tileFinishX = 7;
@@ -36,15 +36,18 @@ public class TileMap : MonoBehaviour
 
         // Setup the selectedUnit's variable
         selectedUnit.GetComponent<Unit>().tileX = (int)selectedUnit.transform.position.x;
-        selectedUnit.GetComponent<Unit>().tileY = (int)selectedUnit.transform.position.y;
-        //selectedUnit.GetComponent<Unit>().map = this;
+        selectedUnit.GetComponent<Unit>().tileY = (int)selectedUnit.transform.position.z;
+        selectedUnit.GetComponent<Unit>().map = this;
 
         totalMapSizeX = mapSizeX + leftBorder + rightBorder; //22
-        totalMapSizeY = mapSizeY + topBorder + bottomBorder; //17
+        totalMapSizeZ = mapSizeY + topBorder + bottomBorder; //17
 
         GenerateMapData();
         GeneratePathfindingGraph();
         GenerateMapVisual();
+
+        //TODO Move camer to half map size co ords
+
 
     }
 
@@ -62,18 +65,18 @@ public class TileMap : MonoBehaviour
     void GenerateMapData()
     {
         // Allocate our map tiles
-        tiles = new int[totalMapSizeX, totalMapSizeY];
+        tiles = new int[totalMapSizeX, totalMapSizeZ];
 
 
         //tile location is [0,0] [row first, column second]
-        int x, y;
+        int x, z;
 
         // Initialize our map tiles to be aisles
         for (x = 0; x < totalMapSizeX; x++)
         {
-            for (y = 0; y < totalMapSizeY; y++)
+            for (z = 0; z < totalMapSizeZ; z++)
             {
-                tiles[x, y] = 0;
+                tiles[x, z] = 0;
             }
         }
 
@@ -81,37 +84,37 @@ public class TileMap : MonoBehaviour
         // Make a wall border area left
         for (x = 0; x < leftBorder; x++)
         {
-            for (y = 0; y < totalMapSizeY; y++)
+            for (z = 0; z < totalMapSizeZ; z++)
             {
-                tiles[x, y] = 3;
+                tiles[x, z] = 3;
             }
         }
 
         // Make a wall border area right
         for (x = totalMapSizeX - rightBorder; x < totalMapSizeX; x++)
         {
-            for (y = 0; y < totalMapSizeY; y++)
+            for (z = 0; z < totalMapSizeZ; z++)
             {
-                tiles[x, y] = 3;
+                tiles[x, z] = 3;
             }
         }
 
 
         // Make a wall border area bottom
-        for (y = 0; y < bottomBorder; y++)
+        for (z = 0; z < bottomBorder; z++)
         {
             for (x = 0; x < totalMapSizeX; x++)
             {
-                tiles[x, y] = 3;
+                tiles[x, z] = 3;
             }
         }
 
         // Make a wall border area top
-        for (y = totalMapSizeY - topBorder; y < totalMapSizeY; y++)
+        for (z = totalMapSizeZ - topBorder; z < totalMapSizeZ; z++)
         {
             for (x = 0; x < totalMapSizeX; x++)
             {
-                tiles[x, y] = 3;
+                tiles[x, z] = 3;
             }
         }
 
@@ -269,60 +272,60 @@ public class TileMap : MonoBehaviour
     void GeneratePathfindingGraph()
     {
         // Initialize the array
-        graph = new Node[totalMapSizeX, totalMapSizeY];
+        graph = new Node[totalMapSizeX, totalMapSizeZ];
 
         // Initialize a Node for each spot in the array
         for (int x = 0; x < totalMapSizeX; x++)
         {
-            for (int y = 0; y < totalMapSizeY; y++)
+            for (int z = 0; z < totalMapSizeZ; z++)
             {
-                graph[x, y] = new Node();
-                graph[x, y].x = x;
-                graph[x, y].z = y;
+                graph[x, z] = new Node();
+                graph[x, z].x = x;
+                graph[x, z].z = z;
             }
         }
 
         // Now that all the nodes exist, calculate their neighbours
         for (int x = 0; x < totalMapSizeX; x++)
         {
-            for (int y = 0; y < totalMapSizeY; y++)
+            for (int z = 0; z < totalMapSizeZ; z++)
             {
 
                 // This is the 4-way connection version:
                 if (x > 0)
-                    graph[x, y].neighbours.Add(graph[x - 1, y]);
+                    graph[x, z].neighbours.Add(graph[x - 1, z]);
                 if (x < totalMapSizeX - 1)
-                    graph[x, y].neighbours.Add(graph[x + 1, y]);
-                if (y > 0)
-                    graph[x, y].neighbours.Add(graph[x, y - 1]);
-                if (y < totalMapSizeY - 1)
-                    graph[x, y].neighbours.Add(graph[x, y + 1]);
+                    graph[x, z].neighbours.Add(graph[x + 1, z]);
+                if (z > 0)
+                    graph[x, z].neighbours.Add(graph[x, z - 1]);
+                if (z < totalMapSizeZ - 1)
+                    graph[x, z].neighbours.Add(graph[x, z + 1]);
 
 
                 // This is the 8-way connection version (allows diagonal movement)
                 // Try left
                 //if(x > 0) {
-                //	graph[x,y].neighbours.Add( graph[x-1, y] );
-                //	if(y > 0)
-                //		graph[x,y].neighbours.Add( graph[x-1, y-1] );
-                //	if(y < totalMapSizeY-1)
-                //		graph[x,y].neighbours.Add( graph[x-1, y+1] );
+                //	graph[x,z].neighbours.Add( graph[x-1, z] );
+                //	if(z > 0)
+                //		graph[x,z].neighbours.Add( graph[x-1, z-1] );
+                //	if(z < totalMapSizeY-1)
+                //		graph[x,z].neighbours.Add( graph[x-1, z+1] );
                 //}
 
                 //// Try Right
                 //if(x < totalMapSizeX-1) {
-                //	graph[x,y].neighbours.Add( graph[x+1, y] );
-                //	if(y > 0)
-                //		graph[x,y].neighbours.Add( graph[x+1, y-1] );
-                //	if(y < totalMapSizeY-1)
-                //		graph[x,y].neighbours.Add( graph[x+1, y+1] );
+                //	graph[x,z].neighbours.Add( graph[x+1, z] );
+                //	if(z > 0)
+                //		graph[x,z].neighbours.Add( graph[x+1, z-1] );
+                //	if(z < totalMapSizeY-1)
+                //		graph[x,z].neighbours.Add( graph[x+1, z+1] );
                 //}
 
                 //// Try straight up and down
-                //if(y > 0)
-                //	graph[x,y].neighbours.Add( graph[x, y-1] );
-                //if(y < totalMapSizeY-1)
-                //	graph[x,y].neighbours.Add( graph[x, y+1] );
+                //if(z > 0)
+                //	graph[x,z].neighbours.Add( graph[x, z-1] );
+                //if(z < totalMapSizeY-1)
+                //	graph[x,z].neighbours.Add( graph[x, z+1] );
 
                 // This also works with 6-way hexes and n-way variable areas (like EU4)
             }
@@ -333,9 +336,9 @@ public class TileMap : MonoBehaviour
     {
         for (int x = 0; x < totalMapSizeX; x++)
         {
-            for (int y = 0; y < totalMapSizeY; y++)
+            for (int z = 0; z < totalMapSizeZ; z++)
             {
-                TileType tt = tileTypes[tiles[x, y]];
+                TileType tt = tileTypes[tiles[x, z]];
 
                 GameObject go;
 
@@ -343,24 +346,24 @@ public class TileMap : MonoBehaviour
                 {
 
                     float xAdj = x + 0.5f;
-                    //float yAdj = y + 0.0f;
+                    //float yAdj = z + 0.0f;
 
-                    go = (GameObject)Instantiate(tt.tileVisualPrefab, new Vector3(xAdj, y, 0), tt.tileVisualPrefab.transform.rotation); //Rotation of prefab
+                    go = (GameObject)Instantiate(tt.tileVisualPrefab, new Vector3(xAdj, 0, z), tt.tileVisualPrefab.transform.rotation); //Rotation of prefab
                 }
                 else
                 {
-                    go = (GameObject)Instantiate(tt.tileVisualPrefab, new Vector3(x, y, 0), tt.tileVisualPrefab.transform.rotation); //Quaternion.identity disables any rotation
+                    go = (GameObject)Instantiate(tt.tileVisualPrefab, new Vector3(x, 0, z), Quaternion.identity); //Quaternion.identity disables any rotation
                 }
 
 
                 ClickableTile ct = go.GetComponent<ClickableTile>();
                 ct.tileX = x;
-                ct.tileY = y;
-                //ct.map = this;
+                ct.tileY = z;
+                ct.map = this;
 
                 //TODO
                 //Set Tower tag using prefab tile type not needed but maybe use for rows??
-                /*switch (tiles[x, y])
+                /*switch (tiles[x, z])
                 {
                     case 8:
                         go.tag = "Tower5";
@@ -385,26 +388,26 @@ public class TileMap : MonoBehaviour
         }
     }
 
-    public Vector3 TileCoordToWorldCoord(int x, int y)
+    public Vector3 TileCoordToWorldCoord(int x, int z)
     {
-        return new Vector3(x, y, 0);
+        return new Vector3(x, 0, z);
     }
 
-    public bool UnitCanEnterTile(int x, int y)
+    public bool UnitCanEnterTile(int x, int z)
     {
 
         // We could test the unit's walk/hover/fly type against various
         // terrain flags here to see if they are allowed to enter the tile.
 
-        return tileTypes[tiles[x, y]].isWalkable;
+        return tileTypes[tiles[x, z]].isWalkable;
     }
 
-    public void GeneratePathTo(int x, int y)
+    public void GeneratePathTo(int x, int z)
     {
         // Clear out our unit's old path.
         selectedUnit.GetComponent<Unit>().currentPath = null;
 
-        if (UnitCanEnterTile(x, y) == false)
+        if (UnitCanEnterTile(x, z) == false)
         {
             // We probably clicked on a mountain or something, so just quit out.
             return;
@@ -423,7 +426,7 @@ public class TileMap : MonoBehaviour
 
         Node target = graph[
                             x,
-                            y
+                            z
                             ];
 
         dist[source] = 0;

@@ -6,7 +6,7 @@ public class ClickableTile : MonoBehaviour {
 
 	public int tileX;
 	public int tileY;
-	public TileMap map;
+	public TileMap2 map;
     public bool isVacant = true; // bool to check if tile is vacant
     public bool isSelected = false;
 
@@ -46,7 +46,7 @@ public class ClickableTile : MonoBehaviour {
            return;
 
         //Moved to start of level
-        //map.GeneratePathTo(tileX, tileY);
+        map.GeneratePathTo(tileX, tileY);
 
         //TODO shooting
 
